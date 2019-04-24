@@ -110,8 +110,8 @@ def process_msg(payload):
 
     if "help" in new_message:
         print("HELP!")
-        ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User <first,last,email,username,privilege>"
-                        + "<br/>UCS Delete-User <username><br/>UCS Add-VLAN <Vlan Name>,<Vlan Number>")
+        ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User `<first,last,email,username,privilege>`"
+                        + "<br/>UCS Delete-User `<username>`<br/>UCS Add-Vlan `<Vlan Name>,<Vlan Number>`")
  
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
     response_body = http_action('POST', API_URL + MESSAGES, POST_HEADERS, body_data)

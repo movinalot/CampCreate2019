@@ -16,7 +16,7 @@ def get_ucs_inventory():
     # Iterate over list displaying attributes from each object
     for rack in RACKS:
         print(rack.dn, rack.model, rack.serial, rack.total_memory, rack.num_of_cpus)
-        response += "DN:" + rack.dn + ", Model: " + rack.model + ", Serial: " + rack.serial + ", Total Memory: " + rack.total_memory + ", Num. CPUs: " + rack.num_of_cpus + "<br/>"
+        response += "DN: " + rack.dn + ", Model: " + rack.model + ", Serial: " + rack.serial + ", Total Memory: " + rack.total_memory + ", Num. CPUs: " + rack.num_of_cpus + "<br/>"
     response += "**"
 
     # Logout
