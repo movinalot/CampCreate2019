@@ -5,6 +5,34 @@ UCS_HOST = os.environ['UCS_HOST']
 UCS_USER = os.environ['UCS_USER']
 UCS_PASS = os.environ['UCS_PASS']
 
+def add_ucs_vlan(vlan_name, vlan_id):
+    from ucsmsdk.ucshandle import UcsHandle
+    from ucsmsdk.mometa.fabric.FabricVlan import FabricVlan
+
+    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
+    HANDLE.login()
+
+    fabric_lan_cloud = HANDLE.query_classid("FabricLanCloud")
+    mo = FabricVlan(parent_mo_or_dn=fabric_lan_cloud[0], name=vlan_name, id=vlan_id)
+    HANDLE.add_mo(mo, True)
+    HANDLE.commit()
+
+    vlans = HANDLE.query_classid("fabricVlan")
+    for vlan in vlans:
+        if vlan.name == vlan_name and vlan.id == vlan_id:
+            vlan_created = True
+            break
+
+    if vlan_created:
+        response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " has been created/updated"
+    else:
+        response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " creation/update failed"
+
+    HANDLE.logout()
+
+    print(response)
+    return response
+
 def get_ucs_inventory():
     HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
     HANDLE.login()
@@ -119,3 +147,4 @@ def delete_ucs_user(userName):
 if __name__ == "__main__":
     get_ucs_faults()
     get_ucs_inventory()
+    add_ucs_vlan("john", "3000")
