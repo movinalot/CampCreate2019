@@ -93,7 +93,9 @@ def process_msg(payload):
 
     if "UCS Add-User" in new_message:
         ucs_response = ucsm_operations.add_ucs_user(new_message[12:])
-    
+    if "UCS Delete-User" in new_message:
+        ucs_response = ucsm_operations.delete_ucs_user(new_message[15:])
+ 
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
     response_body = http_action('POST', API_URL + MESSAGES, POST_HEADERS, body_data)
     body_data = {"roomId": DEST_ROOM, "markdown": ucs_response}

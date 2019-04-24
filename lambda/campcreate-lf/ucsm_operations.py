@@ -59,7 +59,6 @@ def add_ucs_user(inputString):
     from ucsmsdk.mometa.aaa.AaaUser import AaaUser
     from ucsmsdk.mometa.aaa.AaaSshAuth import AaaSshAuth
     from ucsmsdk.mometa.aaa.AaaUserRole import AaaUserRole
-    from ucsmsdk.ucshandle import UcsHandle
 
     handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
     handle.login()
@@ -82,7 +81,24 @@ def add_ucs_user(inputString):
     for user in users:
         response = response + user.name + " "
     handle.logout()
-    response = response + "\n" + "Your password for user " + __user + " is create123. Change upon first login."
+    response = "\n" + response + "\n" + "Your password for user " + __user + " is create123. Change upon first login."
+    print(response)
+    return response
+
+def delete_ucs_user(userName):
+    from ucsmsdk.mometa.aaa.AaaUserEp import AaaUserEp
+
+    handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
+    handle.login()
+    mo = handle.query_dn("sys/user-ext/user-"+userName)
+    handle.remove_mo(mo)
+
+    handle.commit()
+    response = "Deleted User: " + userName + "\nCurrent Users:\n"
+    users = handle.query_classid("AaaUser")
+    for user in users:
+        response = response + user.name + " "
+    handle.logout()
     print(response)
     return response
 
