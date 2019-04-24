@@ -102,10 +102,16 @@ def process_msg(payload):
         startIndex = new_message.find("UCS Delete-User")
         ucs_response = ucsm_operations.delete_ucs_user(new_message[startIndex+16:])
 
+    if "UCS Add-Vlan" in new_message:
+        startIndex = new_message.find("UCS Add-Vlan")
+        inputString = new_message[startIndex+13:]
+        inputs = inputString.split(',')
+        ucs_response = ucsm_operations.add_ucs_vlan(inputs[0], inputs[1])
+
     if "help" in new_message:
         print("HELP!")
         ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User <first,last,email,username,privilege>"
-                        + "<br/>UCS Delete-User <username><br/>UCS Add-VLAN")
+                        + "<br/>UCS Delete-User <username><br/>UCS Add-VLAN <Vlan Name>,<Vlan Number>")
  
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
     response_body = http_action('POST', API_URL + MESSAGES, POST_HEADERS, body_data)
