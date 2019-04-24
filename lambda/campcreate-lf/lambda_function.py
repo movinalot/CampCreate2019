@@ -88,16 +88,20 @@ def process_msg(payload):
     if "UCS Get-Inventory" in new_message:
         ucs_response = ucsm_operations.get_ucs_inventory()
 
-    if "UCS Get-Faults" in new_message:
+    elif "UCS Get-Faults" in new_message:
         ucs_response = ucsm_operations.get_ucs_faults()
 
-    if "UCS Add-User" in new_message:
+    elif "UCS Add-User" in new_message:
         startIndex = new_message.find("UCS Add-User")
         ucs_response = ucsm_operations.add_ucs_user(new_message[startIndex+13:])
 
-    if "UCS Delete-User" in new_message:
+    elif "UCS Delete-User" in new_message:
         startIndex = new_message.find("UCS Delete-User")
         ucs_response = ucsm_operations.delete_ucs_user(new_message[startIndex+16:])
+
+    elif "help" in new_message:
+        ucs_response = "Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Add-User <first,last,email,username,privilege>"
+                        + "<br/>UCS Delete-User <username>"
  
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
     response_body = http_action('POST', API_URL + MESSAGES, POST_HEADERS, body_data)
