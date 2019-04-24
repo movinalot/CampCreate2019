@@ -88,18 +88,19 @@ def process_msg(payload):
     if "UCS Get-Inventory" in new_message:
         ucs_response = ucsm_operations.get_ucs_inventory()
 
-    elif "UCS Get-Faults" in new_message:
+    if "UCS Get-Faults" in new_message:
         ucs_response = ucsm_operations.get_ucs_faults()
 
-    elif "UCS Add-User" in new_message:
+    if "UCS Add-User" in new_message:
         startIndex = new_message.find("UCS Add-User")
         ucs_response = ucsm_operations.add_ucs_user(new_message[startIndex+13:])
 
-    elif "UCS Delete-User" in new_message:
+    if "UCS Delete-User" in new_message:
         startIndex = new_message.find("UCS Delete-User")
         ucs_response = ucsm_operations.delete_ucs_user(new_message[startIndex+16:])
 
-    elif "help" in new_message:
+    if "help" in new_message:
+        print("HELP!")
         ucs_response = "Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Add-User <first,last,email,username,privilege>"
                         + "<br/>UCS Delete-User <username>"
  
