@@ -91,6 +91,9 @@ def process_msg(payload):
     if "UCS Get-Faults" in new_message:
         ucs_response = ucsm_operations.get_ucs_faults()
 
+    if "UCS Get-Users" in new_message:
+        ucs_response = ucsm_operations.get_ucs_user()
+
     if "UCS Add-User" in new_message:
         startIndex = new_message.find("UCS Add-User")
         ucs_response = ucsm_operations.add_ucs_user(new_message[startIndex+13:])

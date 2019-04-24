@@ -55,6 +55,20 @@ def get_ucs_faults():
     print(response)
     return response
 
+def get_ucs_user():
+    from ucsmsdk.mometa.aaa.AaaUserEp import AaaUserEp
+    from ucsmsdk.ucshandle import UcsHandle
+
+    handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
+    handle.login()
+    response = ""
+    users = handle.query_classid("AaaUser")
+    for user in users:
+        response = response + "Username: " + user.name + ", First: " + user.first_name + ", Last: " + user.last_name + ", Email: " + user.email + "<br/>"
+    handle.logout()
+    print(response)
+    return response
+
 def add_ucs_user(inputString):
     from ucsmsdk.mometa.aaa.AaaUser import AaaUser
     from ucsmsdk.mometa.aaa.AaaSshAuth import AaaSshAuth
