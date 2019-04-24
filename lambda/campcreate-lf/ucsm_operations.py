@@ -76,12 +76,12 @@ def add_ucs_user(inputString):
     mo_2 = AaaUserRole(parent_mo_or_dn=mo, descr="", name=__role)
     handle.add_mo(mo)
     handle.commit()
-    response = "Current Users:\n"
+    response = "Current Users:<br/>"
     users = handle.query_classid("AaaUser")
     for user in users:
         response = response + user.name + " "
     handle.logout()
-    response = "\n" + response + "\n" + "Your password for user " + __user + " is create123. Change upon first login."
+    response = "<br/>" + response + "<br/>" + "Your password for user " + __user + " is create123. Change upon first login."
     print(response)
     return response
 
@@ -94,7 +94,7 @@ def delete_ucs_user(userName):
     handle.remove_mo(mo)
 
     handle.commit()
-    response = "Deleted User: " + userName + "\nCurrent Users:\n"
+    response = "Deleted User: " + userName + "<br/>Current Users:<br/>"
     users = handle.query_classid("AaaUser")
     for user in users:
         response = response + user.name + " "
