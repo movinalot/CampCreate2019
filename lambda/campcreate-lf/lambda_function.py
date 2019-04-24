@@ -95,23 +95,40 @@ def process_msg(payload):
         ucs_response = ucsm_operations.get_ucs_user()
 
     if "UCS Add-User" in new_message:
+        #first,last,email,username,role
         startIndex = new_message.find("UCS Add-User")
         ucs_response = ucsm_operations.add_ucs_user(new_message[startIndex+13:])
 
     if "UCS Delete-User" in new_message:
+        #username
         startIndex = new_message.find("UCS Delete-User")
         ucs_response = ucsm_operations.delete_ucs_user(new_message[startIndex+16:])
 
     if "UCS Add-Vlan" in new_message:
+        #name, number
         startIndex = new_message.find("UCS Add-Vlan")
         inputString = new_message[startIndex+13:]
         inputs = inputString.split(',')
         ucs_response = ucsm_operations.add_ucs_vlan(inputs[0], inputs[1])
 
+    if "UCS Delete-Vlan" in new_message:
+        #name
+        startIndex = new_message.find("UCS Delete-Vlan")
+        vlanName = new_message[startIndex+16:]
+        ucs_response = ucsm_operations.delete_ucs_vlan(vlanName)
+
+    if "UCS Add-IP-Pool" in new_message:
+        #name,description,default-gateway,from,to,primary-dns,secondary-dns
+        startIndex = new_message.find("UCS Add-IP-Pool")
+        inputString = new_message[startIndex+16:]
+        inputs = inputString.split(',')
+        ucs_response = ucsm_operations.add_ucs_ippool(index[0], index[1], index[2], index[3], index[4], index[5], index[6])
+
     if "help" in new_message:
         print("HELP!")
-        ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User `<first,last,email,username,privilege>`"
-                        + "<br/>UCS Delete-User `<username>`<br/>UCS Add-Vlan `<Vlan Name>,<Vlan Number>`")
+        ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User `<first>,<last>,<email>,<username>,<privilege>`"
+                        + "<br/>UCS Delete-User `<username>`<br/>UCS Add-Vlan `<Vlan Name>,<Vlan Number>`<br/>UCS Delete-Vlan `<Vlan Name>'"
+                        + "<br/>UCS Add-IP-Pool `<name>,<description>,<default-gateway>,<from>,<to>,<primary-dns>,<secondary-dns>`")
  
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
     response_body = http_action('POST', API_URL + MESSAGES, POST_HEADERS, body_data)
