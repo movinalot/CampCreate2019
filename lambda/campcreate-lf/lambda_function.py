@@ -122,12 +122,12 @@ def process_msg(payload):
         startIndex = new_message.find("UCS Add-IP-Pool")
         inputString = new_message[startIndex+16:].strip()
         inputs = inputString.split(',')
-        ucs_response = ucsm_operations.add_ucs_ippool(index[0], index[1], index[2], index[3], index[4], index[5], index[6])
+        ucs_response = ucsm_operations.add_ucs_ippool(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6])
 
     if "help" in new_message:
         print("HELP!")
         ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User `<first>,<last>,<email>,<username>,<privilege>`"
-                        + "<br/>UCS Delete-User `<username>`<br/>UCS Add-Vlan `<Vlan Name>,<Vlan Number>`<br/>UCS Delete-Vlan `<Vlan Name>'"
+                        + "<br/>UCS Delete-User `<username>`<br/>UCS Add-Vlan `<Vlan Name>,<Vlan Number>`<br/>UCS Delete-Vlan `<Vlan Name>`"
                         + "<br/>UCS Add-IP-Pool `<name>,<description>,<default-gateway>,<from>,<to>,<primary-dns>,<secondary-dns>`")
  
     body_data = {"roomId": DEST_ROOM, "text": person_email + ":  you requested " + new_message}
