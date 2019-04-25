@@ -21,22 +21,22 @@ def add_ucs_ippool(ippool_name, ippool_descr, ippool_def_gw, ippool_from, ippool
     HANDLE.commit()
     HANDLE.logout()
 
-    response = "IpPool: "
+    response = "IpPool: " + ippool_name + " with IP Block: " + ippool_from + "-" + ippool_to + " has been created/updated"
     print(response)
     return response
 
-def delete_ucs_vlan(vlan_name):
+def delete_ucs_vlan(vlan_id):
 
     HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
     HANDLE.login()
 
     vlans = HANDLE.query_classid("fabricVlan")
+    vlan_found = False
     for vlan in vlans:
-        if vlan.name == vlan_name:
+        if vlan.id == vlan_id:
             vlan_found = True
             break
 
-    vlan_found = False
     if vlan_found:
         HANDLE.remove_mo(vlan)
         response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " has been deleted"
@@ -193,4 +193,4 @@ if __name__ == "__main__":
     #get_ucs_inventory()
     #add_ucs_vlan("john", "3000")
     #delete_ucs_vlan("john")
-    add_ucs_ippool("test", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
+    add_ucs_ippool("test-john", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
