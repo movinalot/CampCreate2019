@@ -5,6 +5,50 @@ UCS_HOST = os.environ['UCS_HOST']
 UCS_USER = os.environ['UCS_USER']
 UCS_PASS = os.environ['UCS_PASS']
 
+def add_ucs_ippool(ippool_name, ippool_descr, ippool_def_gw, ippool_from, ippool_to, ippool_prim_dns, ippool_sec_dns):
+    from ucsmsdk.mometa.ippool.IppoolPool import IppoolPool
+    from ucsmsdk.mometa.ippool.IppoolBlock import IppoolBlock
+
+    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
+    HANDLE.login()
+
+    mo = IppoolPool(parent_mo_or_dn="fabric/lan/network-sets", descr=ippool_descr, ext_managed="external", name=ippool_name)
+    HANDLE.add_mo(mo,True)
+
+    mo = IppoolBlock(parent_mo_or_dn="fabric/lan/network-sets/ip-pool-"+ippool_name, def_gw=ippool_def_gw, r_from=ippool_from, to=ippool_to, prim_dns=ippool_prim_dns, sec_dns=ippool_sec_dns)
+    HANDLE.add_mo(mo,True)
+
+    HANDLE.commit()
+    HANDLE.logout()
+
+    response = "IpPool: "
+    print(response)
+    return response
+
+def delete_ucs_vlan(vlan_name):
+
+    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
+    HANDLE.login()
+
+    vlans = HANDLE.query_classid("fabricVlan")
+    for vlan in vlans:
+        if vlan.name == vlan_name:
+            vlan_found = True
+            break
+
+    vlan_found = False
+    if vlan_found:
+        HANDLE.remove_mo(vlan)
+        response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " has been deleted"
+    else:
+        response = "Vlan: " + vlan_name + " does not exist"
+
+    HANDLE.commit()
+    HANDLE.logout()
+
+    print(response)
+    return response
+
 def add_ucs_vlan(vlan_name, vlan_id):
     from ucsmsdk.ucshandle import UcsHandle
     from ucsmsdk.mometa.fabric.FabricVlan import FabricVlan
@@ -20,10 +64,10 @@ def add_ucs_vlan(vlan_name, vlan_id):
     vlans = HANDLE.query_classid("fabricVlan")
     for vlan in vlans:
         if vlan.name == vlan_name and vlan.id == vlan_id:
-            vlan_created = True
+            vlan_found = True
             break
 
-    if vlan_created:
+    if vlan_found:
         response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " has been created/updated"
     else:
         response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " creation/update failed"
@@ -145,6 +189,8 @@ def delete_ucs_user(userName):
     return response
 
 if __name__ == "__main__":
-    get_ucs_faults()
-    get_ucs_inventory()
-    add_ucs_vlan("john", "3000")
+    #get_ucs_faults()
+    #get_ucs_inventory()
+    #add_ucs_vlan("john", "3000")
+    #delete_ucs_vlan("john")
+    add_ucs_ippool("test", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
