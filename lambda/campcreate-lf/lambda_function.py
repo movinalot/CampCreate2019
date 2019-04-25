@@ -107,20 +107,20 @@ def process_msg(payload):
     if "UCS Add-Vlan" in new_message:
         #name, number
         startIndex = new_message.find("UCS Add-Vlan")
-        inputString = new_message[startIndex+13:]
+        inputString = new_message[startIndex+13:].strip()
         inputs = inputString.split(',')
         ucs_response = ucsm_operations.add_ucs_vlan(inputs[0], inputs[1])
 
     if "UCS Delete-Vlan" in new_message:
         #name
         startIndex = new_message.find("UCS Delete-Vlan")
-        vlanName = new_message[startIndex+16:]
+        vlanName = new_message[startIndex+16:].strip()
         ucs_response = ucsm_operations.delete_ucs_vlan(vlanName)
 
     if "UCS Add-IP-Pool" in new_message:
         #name,description,default-gateway,from,to,primary-dns,secondary-dns
         startIndex = new_message.find("UCS Add-IP-Pool")
-        inputString = new_message[startIndex+16:]
+        inputString = new_message[startIndex+16:].strip()
         inputs = inputString.split(',')
         ucs_response = ucsm_operations.add_ucs_ippool(index[0], index[1], index[2], index[3], index[4], index[5], index[6])
 
