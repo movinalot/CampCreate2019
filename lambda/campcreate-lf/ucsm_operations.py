@@ -25,7 +25,7 @@ def add_ucs_ippool(ippool_name, ippool_descr, ippool_def_gw, ippool_from, ippool
     print(response)
     return response
 
-def delete_ucs_vlan(vlan_id):
+def delete_ucs_vlan(vlan_name):
 
     HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
     HANDLE.login()
@@ -33,7 +33,7 @@ def delete_ucs_vlan(vlan_id):
     vlans = HANDLE.query_classid("fabricVlan")
     vlan_found = False
     for vlan in vlans:
-        if vlan.id == vlan_id:
+        if vlan.name == vlan_name:
             vlan_found = True
             break
 
