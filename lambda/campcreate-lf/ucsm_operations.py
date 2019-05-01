@@ -5,32 +5,41 @@ UCS_HOST = os.environ['UCS_HOST']
 UCS_USER = os.environ['UCS_USER']
 UCS_PASS = os.environ['UCS_PASS']
 
+def ucs_login():
+    handle = UcsHandle(ip=UCS_HOST, username=UCS_USER, password=UCS_PASS)
+    handle.login()
+
+    return handle
+
+def ucs_logout(handle):
+    handle.logout()
+    
 def add_ucs_ippool(ippool_name, ippool_descr, ippool_def_gw, ippool_from, ippool_to, ippool_prim_dns, ippool_sec_dns):
     from ucsmsdk.mometa.ippool.IppoolPool import IppoolPool
     from ucsmsdk.mometa.ippool.IppoolBlock import IppoolBlock
 
-    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    HANDLE.login()
+    handle = ucs_login()
 
     mo = IppoolPool(parent_mo_or_dn="fabric/lan/network-sets", descr=ippool_descr, ext_managed="external", name=ippool_name)
-    HANDLE.add_mo(mo,True)
+    handle.add_mo(mo,True)
 
     mo = IppoolBlock(parent_mo_or_dn="fabric/lan/network-sets/ip-pool-"+ippool_name, def_gw=ippool_def_gw, r_from=ippool_from, to=ippool_to, prim_dns=ippool_prim_dns, sec_dns=ippool_sec_dns)
-    HANDLE.add_mo(mo,True)
+    handle.add_mo(mo,True)
 
-    HANDLE.commit()
-    HANDLE.logout()
+    handle.commit()
 
     response = "IpPool: " + ippool_name + " with IP Block: " + ippool_from + "-" + ippool_to + " has been created/updated"
+
+    ucs_logout(handle)
+
     print(response)
     return response
 
 def delete_ucs_vlan(vlan_name):
 
-    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    HANDLE.login()
+    handle = ucs_login()
 
-    vlans = HANDLE.query_classid("fabricVlan")
+    vlans = handle.query_classid("fabricVlan")
     vlan_found = False
     for vlan in vlans:
         if vlan.name == vlan_name:
@@ -38,13 +47,12 @@ def delete_ucs_vlan(vlan_name):
             break
 
     if vlan_found:
-        HANDLE.remove_mo(vlan)
+        handle.remove_mo(vlan)
         response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " has been deleted"
     else:
         response = "Vlan: " + vlan_name + " does not exist"
 
-    HANDLE.commit()
-    HANDLE.logout()
+    handle.commit()
 
     print(response)
     return response
@@ -53,15 +61,14 @@ def add_ucs_vlan(vlan_name, vlan_id):
     from ucsmsdk.ucshandle import UcsHandle
     from ucsmsdk.mometa.fabric.FabricVlan import FabricVlan
 
-    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    HANDLE.login()
+    handle = ucs_login()
 
-    fabric_lan_cloud = HANDLE.query_classid("FabricLanCloud")
+    fabric_lan_cloud = handle.query_classid("FabricLanCloud")
     mo = FabricVlan(parent_mo_or_dn=fabric_lan_cloud[0], name=vlan_name, id=vlan_id)
-    HANDLE.add_mo(mo, True)
-    HANDLE.commit()
+    handle.add_mo(mo, True)
+    handle.commit()
 
-    vlans = HANDLE.query_classid("fabricVlan")
+    vlans = handle.query_classid("fabricVlan")
     for vlan in vlans:
         if vlan.name == vlan_name and vlan.id == vlan_id:
             vlan_found = True
@@ -72,28 +79,27 @@ def add_ucs_vlan(vlan_name, vlan_id):
     else:
         response = "Vlan: " + vlan.name + " with Vlan ID: " + vlan.id + " creation/update failed"
 
-    HANDLE.logout()
+    ucs_logout(handle)
 
     print(response)
     return response
 
 def get_ucs_inventory():
-    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    HANDLE.login()
+
+    handle = ucs_login()
 
     # Queries are executed with a HANDLE member method
-    RACKS = HANDLE.query_classid("ComputeRackUnit")
+    RACKS = handle.query_classid("ComputeRackUnit")
 
     response = "**"
     # Iterate over list displaying attributes from each object
     for rack in RACKS:
-        print(rack.dn, rack.model, rack.serial, rack.total_memory, rack.num_of_cpus)
         response += "DN: " + rack.dn + ", Model: " + rack.model + ", Serial: " + rack.serial + ", Total Memory: " + rack.total_memory + ", Num. CPUs: " + rack.num_of_cpus + "<br/>"
     response += "**"
 
-    # Logout
-    HANDLE.logout()
+    ucs_logout(handle)
 
+    print(response)
     return response
 
 def get_ucs_faults():
@@ -103,10 +109,9 @@ def get_ucs_faults():
     sev_minor    = 0
     sev_warning  = 0
 
-    HANDLE = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    HANDLE.login()
+    handle = ucs_login()
 
-    faults = HANDLE.query_classid("FaultInst")
+    faults = handle.query_classid("FaultInst")
     for fault in faults:
         if fault.severity == 'critical':
             sev_critical += 1
@@ -117,12 +122,12 @@ def get_ucs_faults():
         elif fault.severity == 'warning':
             sev_warning += 1
 
-    HANDLE.logout()
-
     response = ("UCSM Fault Counts - Critical: " + str(sev_critical) +
           " Major: " + str(sev_major) +
           " Minor: " + str(sev_minor) +
           " Warning: " + str(sev_warning))
+
+    ucs_logout(handle)
 
     print(response)
     return response
@@ -131,13 +136,15 @@ def get_ucs_user():
     from ucsmsdk.mometa.aaa.AaaUserEp import AaaUserEp
     from ucsmsdk.ucshandle import UcsHandle
 
-    handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    handle.login()
+    handle = ucs_login()
+
     response = ""
     users = handle.query_classid("AaaUser")
     for user in users:
         response = response + "Username: " + user.name + ", First: " + user.first_name + ", Last: " + user.last_name + ", Email: " + user.email + "<br/>"
-    handle.logout()
+
+    ucs_logout(handle)
+
     print(response)
     return response
 
@@ -146,8 +153,7 @@ def add_ucs_user(inputString):
     from ucsmsdk.mometa.aaa.AaaSshAuth import AaaSshAuth
     from ucsmsdk.mometa.aaa.AaaUserRole import AaaUserRole
 
-    handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    handle.login()
+    handle = ucs_login()
     #First, Last, Email, Username, Role
     print(inputString)
     inputs = inputString.split(',')
@@ -166,16 +172,18 @@ def add_ucs_user(inputString):
     users = handle.query_classid("AaaUser")
     for user in users:
         response = response + user.name + " "
-    handle.logout()
+
     response = "<br/>" + response + "<br/>" + "Your password for user " + __user + " is create123. Change upon first login."
+
+    ucs_logout(handle)
+
     print(response)
     return response
 
 def delete_ucs_user(userName):
     from ucsmsdk.mometa.aaa.AaaUserEp import AaaUserEp
 
-    handle = UcsHandle(UCS_HOST, UCS_USER, UCS_PASS)
-    handle.login()
+    handle = ucs_login()
     mo = handle.query_dn("sys/user-ext/user-"+userName)
     handle.remove_mo(mo)
 
@@ -184,13 +192,15 @@ def delete_ucs_user(userName):
     users = handle.query_classid("AaaUser")
     for user in users:
         response = response + user.name + " "
-    handle.logout()
+
+    ucs_logout(handle)
+
     print(response)
     return response
 
 if __name__ == "__main__":
-    #get_ucs_faults()
-    #get_ucs_inventory()
-    #add_ucs_vlan("john", "3000")
-    #delete_ucs_vlan("john")
+    get_ucs_faults()
+    get_ucs_inventory()
+    add_ucs_vlan("john", "3000")
+    delete_ucs_vlan("john")
     add_ucs_ippool("test-john", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
