@@ -124,6 +124,13 @@ def process_msg(payload):
         inputs = inputString.split(',')
         ucs_response = ucsm_operations.add_ucs_ippool(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6])
 
+    if "UCS Org" in new_message:
+        # op, name, descr
+        startIndex = new_message.find("UCS Add-IP-Pool")
+        inputString = new_message[startIndex+16:].strip()
+        inputs = inputString.split(',')
+        ucs_response = ucsm_operations.manage_org(inputs[0], inputs[1], inputs[2])
+
     if "help" in new_message:
         print("HELP!")
         ucs_response = ("Possible Operations:<br/>UCS Get-Inventory<br/>UCS Get-Faults<br/>UCS Get-Users<br/>UCS Add-User `<first>,<last>,<email>,<username>,<privilege>`"

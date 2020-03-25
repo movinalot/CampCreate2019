@@ -88,13 +88,15 @@ def get_ucs_inventory():
 
     handle = ucs_login()
 
+    SERVER_CLASSES = ["ComputeRackUnit", "ComputeBlade"]
     # Queries are executed with a HANDLE member method
-    RACKS = handle.query_classid("ComputeRackUnit")
+    SERVERS = handle.query_classids(SERVER_CLASSES)
 
     response = "**"
     # Iterate over list displaying attributes from each object
-    for rack in RACKS:
-        response += "DN: " + rack.dn + ", Model: " + rack.model + ", Serial: " + rack.serial + ", Total Memory: " + rack.total_memory + ", Num. CPUs: " + rack.num_of_cpus + "<br/>"
+    for server_class in SERVER_CLASSES:
+        for server in SERVERS[server_class]:
+            response += "DN: " + server.dn + ", Model: " + server.model + ", Serial: " + server.serial + ", Total Memory: " + server.total_memory + ", Num. CPUs: " + server.num_of_cpus + "<br/>"
     response += "**"
 
     ucs_logout(handle)
@@ -198,9 +200,45 @@ def delete_ucs_user(userName):
     print(response)
     return response
 
+def manage_org(org_op, org_name, org_descr=None):
+    from ucsmsdk.mometa.org.OrgOrg import OrgOrg
+    
+    handle = ucs_login()
+
+    if org_op.lower() == "add":
+        mo = OrgOrg(parent_mo_or_dn='org-root', name=org_name, descr=org_descr)
+        handle.add_mo(mo, modify_present=True)
+        handle.commit()
+        response = "Org: " + org_name + " Added/Updated."
+    elif org_op.lower() == "remove":
+        mo = handle.query_dn("org-root/org-"+org_name)
+        if mo:
+            handle.remove_mo(mo)
+            handle.commit()
+            response = "Org: " + org_name + " Removed."
+        else:
+            response = "Org: " + org_name + " Not Found."
+    elif org_op.lower() == "update":
+        mo = handle.query_dn("org-root/org-"+org_name)
+        if mo:
+            mo.descr = org_descr
+            handle.add_mo(mo, modify_present=True)
+            handle.commit()
+            response = "Org: " + org_name + " Updated."
+        else:
+            response = "Org: " + org_name + " Not Found: could not update."
+
+    ucs_logout(handle)
+
+    print(response)
+    return response
 if __name__ == "__main__":
-    get_ucs_faults()
-    get_ucs_inventory()
-    add_ucs_vlan("john", "3000")
-    delete_ucs_vlan("john")
-    add_ucs_ippool("test-john", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
+    manage_org("Add","junk","junk org")
+    manage_org("Update","junk","updated junk org")
+    manage_org("Remove","junk")
+
+    #get_ucs_faults()
+    #get_ucs_inventory()
+    #add_ucs_vlan("john", "3000")
+    #delete_ucs_vlan("john")
+    #add_ucs_ippool("test-john", "test desc", "10.1.1.254", "10.1.1.1", "10.1.1.10", "208.67.220.220", "208.67.222.222")
